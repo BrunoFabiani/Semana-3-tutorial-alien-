@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exercício do Alien</title>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js"></script>
+    <style> body { display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; } </style>
+</head>
+
+<body>
+    <script>
+        // o que acontece aqui?
+        const larguraJogo = 700;
+        const alturaJogo = 850;
+
+        // o que essa parte faz?
+        const config = {
+            type: Phaser.AUTO,
+            width: larguraJogo,
+            height: alturaJogo,
+
+            physics: {
+                default: 'arcade',
+                arcade: {
+                    gravity: {y : 300 },
+                    debug: true
+                }
+            },
+
+            scene: {
+                preload: preload,
+                create: create,
+                update: update
+            }
+        };
+
+        // o que acontece aqui? 
+        const game = new Phaser.Game(config);
+
+        var alien;
+        var teclado;
+        var fogo;
+        var plataforma;
+        var moeda;
+        var pontuação = 0;
+        var placar;
+        var passarinho;
+        var passarinhoVerde;
+        var inZone = false;
+        var inZoneVerde = false;
+        var resultadoLost;
+        var resultadoWin;
+
+        
+     
+
+        function preload() {
+            this.load.image('background', 'assets/bg.png');
+            this.load.image('player', 'assets/alienigena.png');
+            this.load.image('turbo_nave', 'assets/turbo.png');
+            this.load.image('plataforma_tijolo', 'assets/tijolos.png');
+            this.load.image('moeda', 'assets/moeda.png');
+            this.load.spritesheet('passarinho', 'assets/bird-purple.png', { frameWidth: 75, frameHeight: 75 });
+            this.load.spritesheet('passarinhoVerde', 'assets/bird-green.png', { frameWidth: 75, frameHeight: 75 });
+        }
+
+        function create() {
+
+            this.add.image(larguraJogo/2, alturaJogo/2, 'background');
+            // Adicione o "foguinho" do modo turbo
+
+            fogo = this.add.sprite(0, 0, 'turbo_nave');
+            fogo.setVisible(false);
+            
+            //secção do passarinho
+            
+            passarinho = this.physics.add.sprite(100, 300, 'passarinho').setPushable(true)
+
+            passarinhoVerde = this.physics.add.sprite(100, 600, 'passarinho').setPushable(true)
+
+            
+            this.anims.create({ 
+                key: 'fly',
+                frames: this.anims.generateFrameNumbers('passarinho', { start: 0, end: 7 }),
+                frameRate: 10, 
+                repeat: -1 
+            });
+
+            this.anims.create({ 
+                key: 'flyVerde',
+                frames: this.anims.generateFrameNumbers('passarinhoVerde', { start: 0, end: 7 }),
+                frameRate: 10, 
+                repeat: -1 
+            });
+
+            passarinho.anims.play('fly', true);
+            passarinho.body.allowGravity = false
+            
+
+            passarinhoVerde.anims.play('flyVerde', true);
+            passarinhoVerde.body.allowGravity = false
+            
+
+            // o que acontece aqui?
+            alien = this.physics.add.sprite(larguraJogo/2, 0, 'player');
+            alien.setCollideWorldBounds(true);
+            alien.setBounce(0.5);
+            teclado = this.input.keyboard.createCursorKeys();
+
+            //adicionar plataforma
+            plataforma = this.physics.add.staticImage(larguraJogo/2, alturaJogo/2, 'plataforma_tijolo');
+            this.physics.add.collider(alien, plataforma);
+
+            //adicionar moeda
+            moeda = this.physics.add.sprite(larguraJogo/2, 0, 'moeda');
+            moeda.setCollideWorldBounds(true);
+            moeda.setBounce(0.7);
+            this.physics.add.collider(moeda, plataforma);
+
+            
+
+            // adicionando placar 
+            placar = this.add.text(50, 150, 'Moedas:'+ pontuação, {fontSize:'45px', fill:'#495613'})
+            //texto para quando tocar nos passarinhos
+            resultadoLost = this.add.text(larguraJogo/2, 200, 'You Lost', {fontSize:'45px', fill:'#495613'}).setVisible(false)
+            resultadoWin = this.add.text(larguraJogo/2, 200, 'You Won', {fontSize:'45px', fill:'#495613'}).setVisible(false)
+
+            // quando o Alien encontrar na moeda...
+            this.physics.add.overlap(alien, moeda, function(){
+
+                moeda.setVisible(false);//moeda fica invisivel
+
+                var posiçãoMoeda_Y = Phaser.Math.RND.between(50, 650); //sorteia número
+                moeda.setPosition(posiçãoMoeda_Y, 100);//ajusta a posição da moeda
+
+                pontuação +=1; //soma a pontuação
+                placar.setText('Moedas:' + pontuação); //atualiza o texto do placar
+
+                moeda.setVisible(true);//ativa a visão da moeda novamente dando a ilusão de ser uma "nova moeda"
+            });
+
+
+            this.physics.add.collider(alien, passarinho, () => {
+                inZone = true;
+            });
+
+            this.physics.add.collider(alien, passarinhoVerde, () => {
+                inZoneVerde = true;
+            });
+  
+            
+
+        }
+
+        function update() {
+            //Movimento para esquerda [ <- ]
+            if (teclado.left.isDown) {
+                alien.setVelocityX(-150); }
+            
+            //Movimento para direita [ -> ]
+            else if (teclado.right.isDown) {
+                alien.setVelocityX(150); }
+            //Sem movimento horizontal [ x = 0]
+            else {
+                alien.setVelocityX(0);
+            }
+
+            //Movimento para cima [ ^ ]
+            if (teclado.up.isDown) {
+                alien.setVelocityY(-150); 
+                ativarTurbo();
+            }
+            
+            //Movimento para baixo [gravidade em y]
+            else { semTurbo(); }
+            //ação de gravidade  do jogo em y 
+            fogo.setPosition(alien.x, alien.y + alien.height/2);
+
+            if (passarinho.x == 100) {
+            passarinho.setFlip(false, false); //reverte qualquer flip que tenha sido feito para o sprite do passarinho, fazendo ele ser igual de quando o código começou
+            passarinho.ida = true;
+            }
+            if (passarinho.x < 700 && passarinho.ida === true) {
+            console.log("O código verifica a posição do passarinho, e caso o passarinho esteja com o seu valor de x abaixo de 700 e o valor do passarinho.ida ser true o código adiciona +5 para a sua posição x(horizontal). ");
+            passarinho.x += 5;
+            }
+            if (passarinho.x == 700) {
+            passarinho.setFlip(true, false);
+            passarinho.ida = false; //prepara a váriavel do passarinho.ida para que no próximo if ele seja considerado falso e o código funcione.
+            }
+            if (passarinho.x > 100 && passarinho.ida === false) {
+            console.log("Do mesmo jeito que antes o código verifica o valor de x do passarinho e a váriavel do passarinho.ida, e caso os valores forem correspondidos o código agora irá mandar o passarinho na outra direção, subtraindo -5 de sua posição x(horizontal). E como no if anterior ele virá o sprite do passarinho caso este chegue na marca do x = 700, isto dá a ilusão que o passarinho está se movendo de um lado para o outro.");
+            passarinho.x -= 5;
+            }
+
+            if (passarinhoVerde.x == 100) {
+            passarinhoVerde.setFlip(false, false); //reverte qualquer flip que tenha sido feito para o sprite do passarinho, fazendo ele ser igual de quando o código começou
+            passarinhoVerde.ida = true;
+            }
+            if (passarinhoVerde.x < 700 && passarinhoVerde.ida === true) {
+            console.log("O código verifica a posição do passarinho, e caso o passarinho esteja com o seu valor de x abaixo de 700 e o valor do passarinho.ida ser true o código adiciona +5 para a sua posição x(horizontal). ");
+            passarinhoVerde.x += 3;
+            }
+            if (passarinhoVerde.x == 700) {
+            passarinhoVerde.setFlip(true, false);
+            passarinhoVerde.ida = false; //prepara a váriavel do passarinho.ida para que no próximo if ele seja considerado falso e o código funcione.
+            }
+            if (passarinhoVerde.x > 100 && passarinhoVerde.ida === false) {
+            console.log("Do mesmo jeito que antes o código verifica o valor de x do passarinho e a váriavel do passarinho.ida, e caso os valores forem correspondidos o código agora irá mandar o passarinho na outra direção, subtraindo -5 de sua posição x(horizontal). E como no if anterior ele virá o sprite do passarinho caso este chegue na marca do x = 700, isto dá a ilusão que o passarinho está se movendo de um lado para o outro.");
+            passarinhoVerde.x -= 3;
+            }
+
+            if (inZone == true) {
+            alien.destroy();
+            resultadoLost.setVisible(true);
+            }
+
+            if (inZoneVerde == true) {
+            alien.destroy();
+            resultadoLost.setVisible(true);
+            }
+
+            if (pontuação == 10) {
+            resultadoWin.setVisible(true);
+            alien.destroy();
+            }
+
+            }
+    
+    function ativarTurbo() {
+        fogo.setVisible(true);
+    }
+
+    function semTurbo() {
+        fogo.setVisible(false);
+    }
+        
+    </script>
+</body>
+</html>
