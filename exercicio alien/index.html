@@ -10,11 +10,11 @@
 
 <body>
     <script>
-        // o que acontece aqui?
+        // o que acontece aqui? o codigo define a largura da tela do jogo
         const larguraJogo = 700;
         const alturaJogo = 850;
 
-        // o que essa parte faz?
+        // o que essa parte faz? é a configuração do phaser, ela vai definir a altura do jogo, a gravidade e a cena
         const config = {
             type: Phaser.AUTO,
             width: larguraJogo,
@@ -35,9 +35,10 @@
             }
         };
 
-        // o que acontece aqui? 
+        // o que acontece aqui? é a constante que vai guardar o comando do new Phaser que inicia o jogo do phaser e precisa támbem de um config (as configurações do jogo) para funcionar
         const game = new Phaser.Game(config);
-
+    
+        //o meu cantinho para guardar todas as minha váriaveis :>
         var alien;
         var teclado;
         var fogo;
@@ -51,6 +52,7 @@
         var inZoneVerde = false;
         var resultadoLost;
         var resultadoWin;
+        
 
         
      
@@ -122,7 +124,7 @@
 
             // adicionando placar 
             placar = this.add.text(50, 150, 'Moedas:'+ pontuação, {fontSize:'45px', fill:'#495613'})
-            //texto para quando tocar nos passarinhos
+            //texto para quando tocar nos passarinhos ou coletar 10 moedas
             resultadoLost = this.add.text(larguraJogo/2, 200, 'You Lost', {fontSize:'45px', fill:'#495613'}).setVisible(false)
             resultadoWin = this.add.text(larguraJogo/2, 200, 'You Won', {fontSize:'45px', fill:'#495613'}).setVisible(false)
 
@@ -210,7 +212,8 @@
             console.log("Do mesmo jeito que antes o código verifica o valor de x do passarinho e a váriavel do passarinho.ida, e caso os valores forem correspondidos o código agora irá mandar o passarinho na outra direção, subtraindo -5 de sua posição x(horizontal). E como no if anterior ele virá o sprite do passarinho caso este chegue na marca do x = 700, isto dá a ilusão que o passarinho está se movendo de um lado para o outro.");
             passarinhoVerde.x -= 3;
             }
-
+        
+            //irá checar a váriavel para se quando for true o jogador perca o jogo
             if (inZone == true) {
             alien.destroy();
             resultadoLost.setVisible(true);
@@ -221,6 +224,7 @@
             resultadoLost.setVisible(true);
             }
 
+            //checa a pontuação para quando o jogador chegar nela o jogo parar com ele ganhando
             if (pontuação == 10) {
             resultadoWin.setVisible(true);
             alien.destroy();
