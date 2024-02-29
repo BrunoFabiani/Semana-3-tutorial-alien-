@@ -1,0 +1,46 @@
+<!doctype html> 
+<html lang="en"> 
+<head> 
+    <meta charset="UTF-8" />
+    <title>Dragon: 1 Cena</title>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.23.0/dist/phaser.js"></script>
+
+    <style>
+        canvas {
+            border: 5px solid #000000; }
+    </style>
+
+</head>
+
+<body>
+
+    <script type="text/javascript">
+
+        this.config = {
+            type: Phaser.AUTO,
+            width: 400, 
+            height: 600, 
+
+            // para ajustar a escala do jogo de acordo com a tela
+            scale: { 
+                mode: Phaser.Scale.HEIGHT_CONTROLS_WIDTH,
+                //também podemos usar "mode: Phaser.Scale.FIT"
+                autoCenter: Phaser.Scale.CENTER_BOTH
+            },
+            
+            backgroundColor: '#39addd',
+
+            physics: {
+                default: 'arcade',
+                arcade: {
+                    gravity: { y: 10 },
+                    debug: true
+                }
+            },
+
+            scene: {
+                preload: preload,
+                create: create,
+                update: update
+            }
+        };
