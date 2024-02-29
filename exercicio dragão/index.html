@@ -16,10 +16,14 @@
 
     <script type="text/javascript">
 
+        const larguraJogo = 700;
+        const alturaJogo = 850;
+
+
         this.config = {
             type: Phaser.AUTO,
-            width: 400, 
-            height: 600, 
+            width: larguraJogo, 
+            height: alturaJogo, 
 
             // para ajustar a escala do jogo de acordo com a tela
             scale: { 
@@ -33,7 +37,7 @@
             physics: {
                 default: 'arcade',
                 arcade: {
-                    gravity: { y: 10 },
+                    gravity: { y: 300 },
                     debug: true
                 }
             },
@@ -43,4 +47,5 @@
                 create: create,
                 update: update
             }
+        
         };
