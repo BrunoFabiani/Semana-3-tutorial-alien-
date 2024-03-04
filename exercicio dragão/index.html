@@ -6,46 +6,54 @@
     <script src="https://cdn.jsdelivr.net/npm/phaser@3.23.0/dist/phaser.js"></script>
 
     <style>
+        body {
+            margin-top: 1px;
+            padding: 0;
+        }
         canvas {
             border: 5px solid #000000; }
     </style>
 
 </head>
 
+
 <body>
 
-    <script type="text/javascript">
+
+    <script type="module">
 
         const larguraJogo = 700;
         const alturaJogo = 850;
 
+        import MainGame from './scenes/mainGame';
+        import Welcome from './scenes/welcome';
 
-        this.config = {
+        const config = {
             type: Phaser.AUTO,
             width: larguraJogo, 
             height: alturaJogo, 
 
-            // para ajustar a escala do jogo de acordo com a tela
-            scale: { 
-                mode: Phaser.Scale.HEIGHT_CONTROLS_WIDTH,
-                //também podemos usar "mode: Phaser.Scale.FIT"
-                autoCenter: Phaser.Scale.CENTER_BOTH
-            },
             
+            scale: {
+                mode: Phaser.Scale.FIT
+            },
+            autoCenter: Phaser.Scale.CENTER,
             backgroundColor: '#39addd',
-
             physics: {
                 default: 'arcade',
                 arcade: {
-                    gravity: { y: 300 },
-                    debug: true
+                    gravity: { y: 10 },
+                    debug: false 
                 }
             },
+            scene: [MainGame, Welcome]
+        }
+    const game = new Phaser.Game(config);
+    
+    </script>
+</body>
+</html>
 
-            scene: {
-                preload: preload,
-                create: create,
-                update: update
-            }
+
+       
         
-        };
